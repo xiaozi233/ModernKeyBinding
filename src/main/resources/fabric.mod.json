@@ -3,7 +3,7 @@
   "id": "mkb",
   "version": "${version}",
   "name": "Modern KeyBinding",
-  "description": "Add key conflict context && key modifier for legacy fabric",
+  "description": "Add key conflict context && key modifier for ornithe",
   "authors": [
     "Tapio"
   ],
