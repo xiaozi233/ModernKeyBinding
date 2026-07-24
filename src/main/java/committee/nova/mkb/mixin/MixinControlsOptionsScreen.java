@@ -2,7 +2,7 @@ package committee.nova.mkb.mixin;
 
 import committee.nova.mkb.api.IKeyBinding;
 import committee.nova.mkb.keybinding.KeyModifier;
-import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screen.ConfirmScreen;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.options.ControlsOptionsScreen;
@@ -30,9 +30,9 @@ public abstract class MixinControlsOptionsScreen extends Screen {
     public long time;
 
     @Shadow
-    private ButtonWidget resetButton;
+    private ButtonWidget resetAllButton;
 
-    @Inject(method = "mouseClicked", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/options/GameOptions;setKeyBindingCode(Lnet/minecraft/client/options/KeyBinding;I)V"))
+    @Inject(method = "mouseClicked", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/options/GameOptions;setKeyCode(Lnet/minecraft/client/options/KeyBinding;I)V"))
     public void inject$mouseClicked(int mouseX, int mouseY, int mouseButton, CallbackInfo ci) {
         ((IKeyBinding) selectedKeyBinding).setKeyModifierAndCode(KeyModifier.getActiveModifier(), -100 + mouseButton);
     }
@@ -45,52 +45,52 @@ public abstract class MixinControlsOptionsScreen extends Screen {
     public void keyPressed(char typedChar, int keyCode) {
         if (selectedKeyBinding == null) {
             if (keyCode == 1) {
-                this.client.openScreen(null);
-                this.client.closeScreen();
+                this.minecraft.openScreen(null);
+                this.minecraft.lockMouse();
             }
             return;
         }
         final IKeyBinding mixined = (IKeyBinding) selectedKeyBinding;
         if (keyCode == 1) {
             mixined.setKeyModifierAndCode(KeyModifier.NONE, 0);
-            this.options.setKeyBindingCode(this.selectedKeyBinding, 0);
+            this.options.setKeyCode(this.selectedKeyBinding, 0);
         } else if (keyCode != 0) {
             mixined.setKeyModifierAndCode(KeyModifier.getActiveModifier(), keyCode);
-            this.options.setKeyBindingCode(this.selectedKeyBinding, keyCode);
+            this.options.setKeyCode(this.selectedKeyBinding, keyCode);
         } else if (typedChar > 0) {
             mixined.setKeyModifierAndCode(KeyModifier.getActiveModifier(), typedChar + 256);
-            this.options.setKeyBindingCode(this.selectedKeyBinding, typedChar + 256);
+            this.options.setKeyCode(this.selectedKeyBinding, typedChar + 256);
         }
 
         if (!KeyModifier.isKeyCodeModifier(keyCode)) this.selectedKeyBinding = null;
-        this.time = MinecraftClient.getTime();
-        KeyBinding.updateKeysByCode();
+        this.time = Minecraft.getTime();
+        KeyBinding.resetMapping();
     }
 
     @Inject(method = "buttonClicked", at = @At("HEAD"), cancellable = true)
     public void inject$actionPerformed(ButtonWidget button, CallbackInfo ci) {
         if (button.id != 201) return;
-        final Screen current = client.currentScreen;
+        final Screen current = minecraft.screen;
         final ConfirmScreen confirm = new ConfirmScreen((yes, key) -> {
             if (yes) {
-                KeyBinding[] keyBindings = this.client.options.keysAll;
+                KeyBinding[] keyBindings = this.minecraft.options.keyBindings;
                 for (final KeyBinding keyBinding : keyBindings) ((IKeyBinding) keyBinding).setToDefault();
-                KeyBinding.updateKeysByCode();
+                KeyBinding.resetMapping();
             }
-            client.openScreen(current);
+            minecraft.openScreen(current);
         }, I18n.translate("menu.mkb.reset"), "", 13468);
-        client.openScreen(confirm);
+        minecraft.openScreen(confirm);
         ci.cancel();
     }
 
-    @Redirect(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/options/KeyBinding;getDefaultCode()I"))
+    @Redirect(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/options/KeyBinding;getDefaultKeyCode()I"))
     public int redirect$drawScreen$trap(KeyBinding instance) {
-        return instance.getCode();
+        return instance.getKeyCode();
     }
 
     @Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screen/Screen;render(IIF)V"))
     public void inject$drawScreen(int mouseX, int mouseY, float partialTicks, CallbackInfo ci) {
-        final KeyBinding[] keyBindings = options.keysAll;
+        final KeyBinding[] keyBindings = options.keyBindings;
         final int x = keyBindings.length;
         boolean flag1 = false;
         for (KeyBinding keybinding : keyBindings) {
@@ -99,6 +99,6 @@ public abstract class MixinControlsOptionsScreen extends Screen {
                 break;
             }
         }
-        resetButton.active = flag1;
+        resetAllButton.active = flag1;
     }
 }

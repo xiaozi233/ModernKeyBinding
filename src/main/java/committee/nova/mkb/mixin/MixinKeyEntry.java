@@ -1,8 +1,8 @@
 package committee.nova.mkb.mixin;
 
-import com.mojang.realmsclient.gui.ChatFormatting;
+import net.minecraft.text.Formatting;
 import committee.nova.mkb.api.IKeyBinding;
-import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screen.options.ControlsListWidget;
 import net.minecraft.client.gui.screen.options.ControlsOptionsScreen;
 import net.minecraft.client.gui.widget.ButtonWidget;
@@ -32,22 +32,22 @@ public abstract class MixinKeyEntry {
     @Shadow(aliases = {"field_7805", "this$0"})
     private ControlsListWidget outer;
 
-    @Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/widget/ButtonWidget;render(Lnet/minecraft/client/MinecraftClient;II)V", ordinal = 0))
+    @Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/widget/ButtonWidget;render(Lnet/minecraft/client/Minecraft;II)V", ordinal = 0))
     public void inject$drawEntry$1(int index, int x, int y, int rowWidth, int rowHeight, int mouseX, int mouseY, boolean hovered, CallbackInfo ci) {
         resetButton.active = !((IKeyBinding) keyBinding).isSetToDefaultValue();
     }
 
-    @Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/widget/ButtonWidget;render(Lnet/minecraft/client/MinecraftClient;II)V", ordinal = 1))
+    @Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/widget/ButtonWidget;render(Lnet/minecraft/client/Minecraft;II)V", ordinal = 1))
     public void inject$drawEntry$2(int index, int x, int y, int rowWidth, int rowHeight, int mouseX, int mouseY, boolean hovered, CallbackInfo ci) {
         keyBindingButton.message = ((IKeyBinding) keyBinding).getDisplayName();
         boolean conflicted = false;
         boolean keyCodeModifierConflict = true; // less severe form of conflict, like SHIFT conflicting with SHIFT+G
 
         final ControlsOptionsScreen controls = ((AccessorControlsListWidget) outer).getParent();
-        final MinecraftClient mc = ((AccessorScreen) controls).getClient();
+        final Minecraft mc = ((AccessorScreen) controls).getMinecraft();
 
-        if (this.keyBinding.getCode() != 0) {
-            for (KeyBinding keybinding : mc.options.keysAll) {
+        if (this.keyBinding.getKeyCode() != 0) {
+            for (KeyBinding keybinding : mc.options.keyBindings) {
                 final IKeyBinding mixined = (IKeyBinding) keybinding;
                 if (keybinding != this.keyBinding && mixined.conflicts(this.keyBinding)) {
                     conflicted = true;
@@ -57,13 +57,13 @@ public abstract class MixinKeyEntry {
         }
 
         if (controls.selectedKeyBinding == this.keyBinding) {
-            this.keyBindingButton.message = ChatFormatting.WHITE + "> " + ChatFormatting.YELLOW + this.keyBindingButton.message + ChatFormatting.WHITE + " <";
+            this.keyBindingButton.message = Formatting.WHITE + "> " + Formatting.YELLOW + this.keyBindingButton.message + Formatting.WHITE + " <";
         } else if (conflicted) {
-            this.keyBindingButton.message = (keyCodeModifierConflict ? ChatFormatting.GOLD : ChatFormatting.RED) + this.keyBindingButton.message;
+            this.keyBindingButton.message = (keyCodeModifierConflict ? Formatting.GOLD : Formatting.RED) + this.keyBindingButton.message;
         }
     }
 
-    @Inject(method = "mouseClicked", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/options/GameOptions;setKeyBindingCode(Lnet/minecraft/client/options/KeyBinding;I)V"))
+    @Inject(method = "mouseClicked", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/options/GameOptions;setKeyCode(Lnet/minecraft/client/options/KeyBinding;I)V"))
     public void inject$mousePressed(int index, int mouseX, int mouseY, int button, int x, int y, CallbackInfoReturnable<Boolean> cir) {
         ((IKeyBinding) keyBinding).setToDefault();
     }

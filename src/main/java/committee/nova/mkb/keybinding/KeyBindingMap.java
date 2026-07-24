@@ -80,7 +80,7 @@ public class KeyBindingMap {
 
     public void removeKey(KeyBinding keyBinding) {
         final KeyModifier keyModifier = ((IKeyBinding) keyBinding).getKeyModifier();
-        final int keyCode = keyBinding.getCode();
+        final int keyCode = keyBinding.getKeyCode();
         final IntHashMap<Collection<KeyBinding>> bindingsMap = map.get(keyModifier);
         final Collection<KeyBinding> bindingsForKey = bindingsMap.lookup(keyCode);
         if (bindingsForKey != null) {

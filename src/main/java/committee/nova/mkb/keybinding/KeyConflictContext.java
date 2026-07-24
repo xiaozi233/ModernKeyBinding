@@ -1,6 +1,6 @@
 package committee.nova.mkb.keybinding;
 
-import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.Minecraft;
 
 public enum KeyConflictContext implements IKeyConflictContext {
     /**
@@ -25,7 +25,7 @@ public enum KeyConflictContext implements IKeyConflictContext {
     GUI {
         @Override
         public boolean isActive() {
-            return MinecraftClient.getInstance().currentScreen != null;
+            return Minecraft.getInstance().screen != null;
         }
 
         @Override

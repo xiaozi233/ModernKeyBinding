@@ -1,6 +1,6 @@
 package committee.nova.mkb.keybinding;
 
-import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.options.GameOptions;
 import net.minecraft.client.resource.language.I18n;
@@ -13,7 +13,7 @@ public enum KeyModifier {
     CONTROL {
         @Override
         public boolean matches(int keyCode) {
-            if (MinecraftClient.IS_MAC) {
+            if (Minecraft.IS_MAC) {
                 return keyCode == Keyboard.KEY_LMETA || keyCode == Keyboard.KEY_RMETA;
             } else {
                 return keyCode == Keyboard.KEY_LCONTROL || keyCode == Keyboard.KEY_RCONTROL;
@@ -22,13 +22,13 @@ public enum KeyModifier {
 
         @Override
         public boolean isActive(@Nullable IKeyConflictContext conflictContext) {
-            return Screen.hasControlDown();
+            return Screen.isControlDown();
         }
 
         @Override
         public String getLocalizedComboName(int keyCode) {
-            String keyName = GameOptions.getFormattedNameForKeyCode(keyCode);
-            String localizationFormatKey = MinecraftClient.IS_MAC ? "controls.mkb.control.mac" : "controls.mkb.control";
+            String keyName = GameOptions.getKeyName(keyCode);
+            String localizationFormatKey = Minecraft.IS_MAC ? "controls.mkb.control.mac" : "controls.mkb.control";
             return I18n.translate(localizationFormatKey, keyName);
         }
     },
@@ -40,12 +40,12 @@ public enum KeyModifier {
 
         @Override
         public boolean isActive(@Nullable IKeyConflictContext conflictContext) {
-            return Screen.hasShiftDown();
+            return Screen.isShiftDown();
         }
 
         @Override
         public String getLocalizedComboName(int keyCode) {
-            String keyName = GameOptions.getFormattedNameForKeyCode(keyCode);
+            String keyName = GameOptions.getKeyName(keyCode);
             return I18n.translate("controls.mkb.shift", keyName);
         }
     },
@@ -62,7 +62,7 @@ public enum KeyModifier {
 
         @Override
         public String getLocalizedComboName(int keyCode) {
-            String keyName = GameOptions.getFormattedNameForKeyCode(keyCode);
+            String keyName = GameOptions.getKeyName(keyCode);
             return I18n.translate("controls.mkb.alt", keyName);
         }
     },
@@ -86,7 +86,7 @@ public enum KeyModifier {
 
         @Override
         public String getLocalizedComboName(int keyCode) {
-            return GameOptions.getFormattedNameForKeyCode(keyCode);
+            return GameOptions.getKeyName(keyCode);
         }
     };
 

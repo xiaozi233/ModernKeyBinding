@@ -8,7 +8,7 @@ import java.util.List;
 
 @Mixin(KeyBinding.class)
 public interface AccessorKeyBinding {
-    @Accessor("KEYS")
+    @Accessor("ALL")
     static List<KeyBinding> getKeybindArray() {
         throw new AssertionError();
     }

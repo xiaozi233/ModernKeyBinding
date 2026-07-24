@@ -1,14 +1,16 @@
 package committee.nova.mkb.mixin;
 
+import com.llamalad7.mixinextras.sugar.Local;
 import committee.nova.mkb.api.IKeyBinding;
 import committee.nova.mkb.keybinding.IKeyConflictContext;
 import committee.nova.mkb.keybinding.KeyConflictContext;
 import committee.nova.mkb.keybinding.KeyModifier;
-import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.options.GameOptions;
 import net.minecraft.client.options.KeyBinding;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
@@ -22,55 +24,55 @@ import java.io.PrintWriter;
 @Mixin(GameOptions.class)
 public abstract class MixinGameSettings {
     @Shadow
-    public KeyBinding keyForward;
+    public KeyBinding forwardKey;
 
     @Shadow
-    public KeyBinding keyLeft;
+    public KeyBinding leftKey;
 
     @Shadow
-    public KeyBinding keyBack;
+    public KeyBinding backKey;
 
     @Shadow
-    public KeyBinding keyRight;
+    public KeyBinding rightKey;
 
     @Shadow
-    public KeyBinding keyJump;
+    public KeyBinding jumpKey;
 
     @Shadow
-    public KeyBinding keySneak;
+    public KeyBinding sneakKey;
 
     @Shadow
-    public KeyBinding keySprint;
+    public KeyBinding sprintKey;
 
     @Shadow
-    public KeyBinding keyAttack;
+    public KeyBinding attackKey;
 
     @Shadow
-    public KeyBinding keyChat;
+    public KeyBinding chatKey;
 
     @Shadow
-    public KeyBinding keyPlayerList;
+    public KeyBinding playerListKey;
 
     @Shadow
-    public KeyBinding keyCommand;
+    public KeyBinding commandKey;
 
     @Shadow
-    public KeyBinding keyTogglePerspective;
+    public KeyBinding togglePerspectiveKey;
 
     @Shadow
-    public KeyBinding keySmoothCamera;
+    public KeyBinding smoothCameraKey;
 
     @Inject(method = "<init>()V", at = @At("RETURN"))
     public void inject$init$1(CallbackInfo ci) {
         setKeyBindProperties();
     }
 
-    @Inject(method = "<init>(Lnet/minecraft/client/MinecraftClient;Ljava/io/File;)V", at = @At("RETURN"))
-    public void inject$init$2(MinecraftClient mc, File dir, CallbackInfo ci) {
+    @Inject(method = "<init>(Lnet/minecraft/client/Minecraft;Ljava/io/File;)V", at = @At("RETURN"))
+    public void inject$init$2(Minecraft mc, File dir, CallbackInfo ci) {
         setKeyBindProperties();
     }
 
-    @Redirect(method = "save", at = @At(value = "INVOKE", target = "Ljava/io/PrintWriter;println(Ljava/lang/String;)V", ordinal = 61))
+    @Redirect(method = "save", at = @At(value = "INVOKE", target = "Ljava/io/PrintWriter;println(Ljava/lang/String;)V", ordinal = 55))
     public void redirect$saveOptions$trap(PrintWriter instance, String s) {
         // Do nothing
     }
@@ -78,23 +80,23 @@ public abstract class MixinGameSettings {
     @Inject(method = "save", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/sound/SoundCategory;values()[Lnet/minecraft/client/sound/SoundCategory;"), locals = LocalCapture.CAPTURE_FAILHARD)
     public void inject$saveOptions(CallbackInfo ci, PrintWriter printwriter, KeyBinding[] keyBindings) {
         for (final KeyBinding binding : keyBindings) {
-            final String x = "key_" + binding.getTranslationKey() + ":" + binding.getCode();
+            final String x = "key_" + binding.getName() + ":" + binding.getKeyCode();
             final IKeyBinding mixined = (IKeyBinding) binding;
             printwriter.println(mixined.getKeyModifier() != KeyModifier.NONE ? x + ":" + mixined.getKeyModifier() : x);
         }
     }
 
-    @Redirect(method = "load", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/options/KeyBinding;setCode(I)V"))
+    @Redirect(method = "load", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/options/KeyBinding;setKeyCode(I)V"))
     public void redirect$loadOptions$trap(KeyBinding instance, int p_151462_1_) {
         // Do nothing
     }
 
-    @Inject(method = "load", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/sound/SoundCategory;values()[Lnet/minecraft/client/sound/SoundCategory;"), locals = LocalCapture.CAPTURE_FAILHARD)
-    public void inject$loadOptions(CallbackInfo ci, BufferedReader bufferedreader, String s, String[] aString, KeyBinding[] aKeybinding, int i) {
+    @Inject(method = "load", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/sound/SoundCategory;values()[Lnet/minecraft/client/sound/SoundCategory;"))
+    public void inject$loadOptions(CallbackInfo ci, @Local String[] aString, @Local KeyBinding[] aKeybinding, @Local(ordinal = 0) int i) {
         for (int j = 0; j < i; ++j) {
             final KeyBinding keybind = aKeybinding[j];
 
-            if (aString[0].equals("key_" + keybind.getTranslationKey())) {
+            if (aString[0].equals("key_" + keybind.getName())) {
                 final String s2 = aString[1];
                 final IKeyBinding mixined = (IKeyBinding) keybind;
                 try {
@@ -108,12 +110,14 @@ public abstract class MixinGameSettings {
         }
     }
 
-    private void setKeyBindProperties() {
-        setKeyConflictContext(keyForward, keyLeft, keyBack, keyRight, keyJump, keySneak,
-                keySprint, keyAttack, keyChat, keyPlayerList, keyCommand, keyTogglePerspective, keySmoothCamera);
+    @Unique
+	private void setKeyBindProperties() {
+        setKeyConflictContext(forwardKey, leftKey, backKey, rightKey, jumpKey, sneakKey,
+                sprintKey, attackKey, chatKey, playerListKey, commandKey, togglePerspectiveKey, smoothCameraKey);
     }
 
-    private static void setKeyConflictContext(KeyBinding... keybindingArray) {
+    @Unique
+	private static void setKeyConflictContext(KeyBinding... keybindingArray) {
         final IKeyConflictContext inGame = KeyConflictContext.IN_GAME;
         for (final KeyBinding keyBinding : keybindingArray) {
             final IKeyBinding mixined = (IKeyBinding) keyBinding;

@@ -15,7 +15,7 @@ public class Utilities {
     public static void updateKeyBindState() {
         for (KeyBinding keybinding : AccessorKeyBinding.getKeybindArray()) {
             try {
-                KeyBinding.setKeyPressed(keybinding.getCode(), keybinding.getCode() < 256 && Keyboard.isKeyDown(keybinding.getCode()));
+                KeyBinding.set(keybinding.getKeyCode(), keybinding.getKeyCode() < 256 && Keyboard.isKeyDown(keybinding.getKeyCode()));
             } catch (IndexOutOfBoundsException ignored) {
 
             }

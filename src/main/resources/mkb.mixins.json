@@ -9,10 +9,10 @@
     "AccessorScreen",
     "MixinControlsOptionsScreen",
     "MixinGameSettings",
-    "MixinHandledScreen",
+    "MixinInventoryMenuScreen",
     "MixinKeyBinding",
     "MixinKeyEntry",
-    "MixinMinecraftClient"
+    "MixinMinecraft"
   ],
   "injectors": {
     "defaultRequire": 1
