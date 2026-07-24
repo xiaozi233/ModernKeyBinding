@@ -29,7 +29,7 @@ public abstract class MixinKeyEntry {
     @Final
     private ButtonWidget keyBindingButton;
 
-    @Shadow(aliases = {"field_7805", "this$0"})
+    @Shadow(aliases = {"f_31330911", "this$0"})
     private ControlsListWidget outer;
 
     @Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/widget/ButtonWidget;render(Lnet/minecraft/client/Minecraft;II)V", ordinal = 0))
