@@ -5,7 +5,8 @@
   "name": "Modern KeyBinding",
   "description": "Add key conflict context && key modifier for ornithe",
   "authors": [
-    "Tapio"
+    "Tapio",
+    "xiaozi0721"
   ],
   "contact": {
     "sources": "https://github.com/Nova-Committee/ModernKeyBinding"
@@ -22,7 +23,8 @@
   ],
   "depends": {
     "fabricloader": ">=0.12.0",
-    "minecraft": "1.8.x"
+    "minecraft": "1.8.x",
+    "osl": ">=0.17.0"
   },
   "suggests": {
     "another-mod": "*"
