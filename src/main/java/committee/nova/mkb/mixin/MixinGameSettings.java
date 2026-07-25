@@ -8,16 +8,16 @@ import committee.nova.mkb.keybinding.KeyModifier;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.options.GameOptions;
 import net.minecraft.client.options.KeyBinding;
+import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.PrintWriter;
 
@@ -72,13 +72,27 @@ public abstract class MixinGameSettings {
         setKeyBindProperties();
     }
 
-    @Redirect(method = "save", at = @At(value = "INVOKE", target = "Ljava/io/PrintWriter;println(Ljava/lang/String;)V", ordinal = 55))
+    @Redirect(
+		method = "save",
+		slice = @Slice(
+			from = @At(
+				value = "FIELD",
+				target = "Lnet/minecraft/client/options/GameOptions;keyBindings:[Lnet/minecraft/client/options/KeyBinding;",
+				opcode = Opcodes.GETFIELD
+			)
+		),
+		at = @At(
+			value = "INVOKE",
+			target = "Ljava/io/PrintWriter;println(Ljava/lang/String;)V",
+			ordinal = 0
+		)
+	)
     public void redirect$saveOptions$trap(PrintWriter instance, String s) {
         // Do nothing
     }
 
-    @Inject(method = "save", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/sound/SoundCategory;values()[Lnet/minecraft/client/sound/SoundCategory;"), locals = LocalCapture.CAPTURE_FAILHARD)
-    public void inject$saveOptions(CallbackInfo ci, PrintWriter printwriter, KeyBinding[] keyBindings) {
+    @Inject(method = "save", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/sound/SoundCategory;values()[Lnet/minecraft/client/sound/SoundCategory;"))
+    public void inject$saveOptions(CallbackInfo ci, @Local PrintWriter printwriter, @Local KeyBinding[] keyBindings) {
         for (final KeyBinding binding : keyBindings) {
             final String x = "key_" + binding.getName() + ":" + binding.getKeyCode();
             final IKeyBinding mixined = (IKeyBinding) binding;
