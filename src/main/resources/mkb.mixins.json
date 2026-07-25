@@ -3,10 +3,13 @@
   "minVersion": "0.8",
   "package": "committee.nova.mkb.mixin",
   "compatibilityLevel": "JAVA_8",
+  "plugin": "committee.nova.mkb.mixin.MkbMixinPlugin",
   "client": [
     "AccessorControlsListWidget",
     "AccessorKeyBinding",
     "AccessorScreen",
+    "MixinControlsListWidget",
+    "MixinControlsListWidget$MixinKeyEntry",
     "MixinControlsOptionsScreen",
     "MixinGameSettings",
     "MixinInventoryMenuScreen",
